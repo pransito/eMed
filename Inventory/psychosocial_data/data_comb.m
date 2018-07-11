@@ -2,6 +2,8 @@ function data_comb
 
 % Get data from DDT and combine them with data from quetionnaires and
 % demographic data
+% TODO: make explicit where the data lies; or change the location because
+% now it is on a remote disk
 
 clear
 
