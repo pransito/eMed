@@ -29,6 +29,7 @@ library(foreign)
 ## GET DATA ===================================================================
 # get the data
 cur_file_mnm = 'S:/AG/AG-Emotional-Neuroscience-Backup/NGFN/SPSS-Datenmasken/Datenmasken_FINALs/Mannheim/Screen_Base_Neuro_SUMMENWERTE_ALL_FINAL_2013_Multicentre_gelöscht_23.01.2013_copy.sav'
+cur_file_bln = 'S:\AG\AG-Emotional-Neuroscience\Restricted\NGFN\NGFN plus\Datenmasken/NGFNplus_Datenmaske_Fragebogen_Berlin_05.03.13_KCH.sav'
 spss_mnm     = as.data.frame(read.spss(cur_file_mnm,encoding='UTF-8',use.value.labels = F))
 
 ## MANNHEIM ===================================================================
