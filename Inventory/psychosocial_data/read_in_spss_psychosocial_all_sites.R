@@ -13,6 +13,10 @@ library(foreign)
 library(compiler)
 library(psych)
 
+## MESSAGES TODOS =============================================================
+message(strcat('Careful. Have not checked systematically if recoding of items needed to be done. \n',
+              'But seems as if it was. So far. We trust the PHP output/the SPSS files.'))
+
 ## FUNCTIONS ==================================================================
 agk.recode <- function(x,y,z) {
   # a recode function
