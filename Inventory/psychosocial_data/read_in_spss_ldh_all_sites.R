@@ -42,6 +42,9 @@ agk.recode.c = cmpfun(agk.recode)
 ## PATHS TO SPSS FILES ==========================================================
 # get the data
 # NB: There are several SPSS data files for Mannheim. It is unclear in what respect they differ.
+# NB: For now taking the most recent document.
+# syntax used: 'S:/AG/AG-Emotional-Neuroscience/Restricted/NGFN/NGFN plus/Datenmasken/LDH/LDH-Syntax Mannheim/NGFN13_SYNTAX_LDH_ANNE_14062011_neu.sps'
+
 cur_file_mnm = 'S:/AG/AG-Emotional-Neuroscience/Restricted/NGFN/NGFN plus/Datenmasken/LDH/LDH-Syntax Mannheim/ldh_gesamt_01-55+2001-2005_korrigiert_15.06.2011.sav'
 cur_file_bnn = ''
 cur_file_bln = ''
@@ -55,30 +58,50 @@ cur_f$file      = cur_file_bln
 cur_f$site      = 'Berlin'
 spss_files[[2]] = cur_f
 
-
 for (ss in 1:length(spss_files)) {
   ## GET DATA ===================================================================
-  spss_mnm     = as.data.frame(read.spss(spss_files[[ss]]$file,use.value.labels = F))
+  spss_mnm = as.data.frame(read.spss(spss_files[[ss]]$file,use.value.labels = F))
+  
+  # recode all variable names to lower case
+  names(spss_mnm) = tolower(names(spss_mnm))
   
   ## RECODING OF VARIABLES FOR MANNHEIM DUE TO INCORRECTLY NAMED VARIABLES ('ldg' -> 'ldh')
-  source          = 'ldg'
-  transl          = 'ldh'
-  names(spss_mnm) = agk.recode(names(spss_mnm),source,transl)
+  source          = 'ldg_'
+  transl          = 'ldh_'
+  names(spss_mnm) = gsub(source,transl,names(spss_mnm))
 
+  ## GET PHASE LENGTHS FOR ALL DRINKING PHASES ==================================
+  # get all phase starts
+  phase_starts = names(spss_mnm)[grep('ldh_za',names(spss_mnm))]
+  phase_ends   = names(spss_mnm)[grep('ldh_ze',names(spss_mnm))]
+  stopifnot(length(phase_starts) == length(phase_ends))
   
-  
-  RECODE ldg_dwg11 (0 thru Highest=COPY) (ELSE=SYSMIS) INTO ldh_dwg11.
-  RECODE ldg_mbg11 (0 thru Highest=COPY) (ELSE=SYSMIS) INTO ldh_mbg11.
-  RECODE ldg_m11 (ELSE=COPY) INTO ldh_m11.
-  RECODE ldg_msg12 (0 thru Highest=COPY) (ELSE=SYSMIS) INTO ldh_msg12.
-  RECODE ldh_al_6 (0 thru Highest=COPY) (ELSE=SYSMIS) INTO ldh_al6.
-  RECODE ldh_dbk11 (0 thru Highest=COPY) (ELSE=SYSMIS) INTO ldh_dkb11.
-  RECODE ldh_dbk12 (0 thru Higest=COPY) (ELSE=SYSMIS) INTO ldh_dkb12.
-  
-  
-  
- ## GET DAY, MONTH AND YEAR SEPARATELY FOR ALL VARIABLES CONSISTING OF DATES ====
-  
+  for (pp in 1:length(phase_starts)) {
+    # put day information on phase start variable
+    spss_mnm[phase_starts[pp]] = paste0('01/',spss_mnm[[phase_starts[pp]]])
+    
+    # recode date of phase start into machine-readible date format
+    spss_mnm[phase_starts[pp]] = as.Date(spss_mnm[[phase_starts[pp]]],format = '%d/%m/%Y')
+    
+    # find the according phase_end
+    cur_ps  = phase_starts[pp]
+    cur_ps  = strsplit(cur_ps,'ldh_za')
+    cur_key = paste0('ldh_ze',cur_ps[[1]][2])
+    
+    # put day information on phase end variable
+    spss_mnm[cur_key] = paste0('01/',spss_mnm[[cur_key]])
+    
+    # recode date of phase end into machine-readible date format
+    spss_mnm[cur_key] = as.Date(spss_mnm[[cur_key]],format = '%d/%m/%Y')
+    
+    # compute phase length in months
+    cur_phase_name             = paste0('Ph',cur_ps[[1]][2],'_length')
+    spss_mnm[[cur_phase_name]] = (spss_mnm[[cur_key]]-spss_mnm[[phase_starts[pp]]])/30.41667
+    spss_mnm[[cur_phase_name]] = round(as.numeric(spss_mnm[[cur_phase_name]]))
+    
+    # Variable Lable...
+    
+  }
  
   
   

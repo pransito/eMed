@@ -84,7 +84,7 @@ cur_f$file      = cur_file_bnn
 cur_f$site      = 'Bonn'
 spss_files[[3]] = cur_f
 
-# adding the AUQ for Berlin (sum scores only)
+# adding the AUQ for Berlin (sum scores only) [nothing else exists, we checked]
 auq_bln = as.data.frame(read.spss(auq_file_bln,encoding='UTF-8',use.value.labels = F))
 
 for (ss in 1:length(spss_files)) {
