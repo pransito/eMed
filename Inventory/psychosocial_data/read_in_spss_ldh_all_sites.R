@@ -142,7 +142,9 @@ for (ss in 1:length(spss_files)) {
     attr(spss_mnm[[new_var_name]],'Variable_Name_Long')   = paste('Alcohol intake on a maximum day',pp)
   }
   
-  # continue at line 1336 ***BEREINIGUNG MÖGLICHER ANGABEFEHLER: Wenn Maximalkonsummenge kleiner als Durchschnittskonsummenge, ersetze Maximalkonsummenge mit Null***                                                    
+  # continue at line 1336 ***BEREINIGUNG MÖGLICHER ANGABEFEHLER: Wenn Maximalkonsummenge kleiner als Durchschnittskonsummenge, ersetze Maximalkonsummenge mit Null*** 
+  IF(Ph1_alkamount_m<Ph1_alkamount_d) Ph1_alkamount_m=0.
+  
 
 
 }

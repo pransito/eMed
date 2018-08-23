@@ -12,6 +12,8 @@ library(stringr)
 library(foreign)
 library(compiler)
 library(psych)
+library(plyr)
+library(xlsx)
 
 ## MESSAGES TODOS =============================================================
 message(strcat('Careful. Have not checked systematically if recoding of items needed to be done. \n',
@@ -86,6 +88,9 @@ spss_files[[3]] = cur_f
 
 # adding the AUQ for Berlin (sum scores only) [nothing else exists, we checked]
 auq_bln = as.data.frame(read.spss(auq_file_bln,encoding='UTF-8',use.value.labels = F))
+
+# BONN has no single-item SPSS file?!?!?!??!
+warning('Bonn has no single item spss file; we are using pre-summed data here; not good! often no data at all!')
 
 for (ss in 1:length(spss_files)) {
   ## GET DATA ===================================================================
@@ -328,198 +333,325 @@ for (ss in 1:length(spss_files)) {
   attr(spss_mnm$TUP6_SSSV_TS,'Variable_Name_Long') = 'SSSV Total Score'
   attr(spss_mnm$TUP6_SSSV_TS,'value.labels')       = NULL
   
-  ## CONTINUE HERE FOR BONN ##
   ## NEO-FFI (60 Items) =========================================================
-  # SCORE-BERECHNUNG
-  # Neurotizismus (N Items: 12)
-  spss_mnm$TUP6_NEO_N                            = with(spss_mnm,{neo_1+neo_6+neo_11+neo_16+neo_21+neo_26+neo_31+neo_36+neo_41+neo_46+neo_51+neo_56})
-  attr(spss_mnm$TUP6_NEO_N,'Variable_Name_Long') = 'NEO-FFI Neuroticism'
-  attr(spss_mnm$TUP6_NEO_N,'value.labels')       = NULL
-  
-  # Extraversion (N Items: 12)
-  spss_mnm$TUP6_NEO_E                            = with(spss_mnm,{neo_2+neo_7+neo_12+neo_17+neo_22+neo_27+neo_32+neo_37+neo_42+neo_47+neo_52+neo_57})
-  attr(spss_mnm$TUP6_NEO_E,'Variable_Name_Long') = 'NEO-FFI Extraversion'
-  attr(spss_mnm$TUP6_NEO_E,'value.labels')       = NULL
-  
-  # Openess to Experiences (N Items: 12)
-  spss_mnm$TUP6_NEO_O                            = with(spss_mnm,{neo_3+neo_8+neo_13+neo_18+neo_23+neo_28+neo_33+neo_38+neo_43+neo_48+neo_53+neo_58})
-  attr(spss_mnm$TUP6_NEO_O,'Variable_Name_Long') = 'NEO-FFI Openness to New Experiences'
-  attr(spss_mnm$TUP6_NEO_O,'value.labels')       = NULL
-  
-  # Agreeableness (N Items: 12)
-  spss_mnm$TUP6_NEO_A                            = with(spss_mnm,{neo_4+neo_9+neo_14+neo_19+neo_24+neo_29+neo_34+neo_39+neo_44+neo_49+neo_54+neo_59})
-  attr(spss_mnm$TUP6_NEO_A,'Variable_Name_Long') = 'NEO-FFI Agreeableness'
-  attr(spss_mnm$TUP6_NEO_A,'value.labels')       = NULL
-  
-  # Gewissenhaftigkeit/ Conscientiousness (N Items: 12)
-  spss_mnm$TUP6_NEO_C                            = with(spss_mnm,{neo_5+neo_10+neo_15+neo_20+neo_25+neo_30+neo_35+neo_40+neo_45+neo_50+neo_55+neo_60})
-  attr(spss_mnm$TUP6_NEO_C,'Variable_Name_Long') = 'NEO-FFI Conscientiousness'
-  attr(spss_mnm$TUP6_NEO_C,'value.labels')       = NULL
+  if (spss_files[[ss]]$site != 'Bonn') {
+    # SCORE-BERECHNUNG
+    # Neurotizismus (N Items: 12)
+    spss_mnm$TUP6_NEO_N                            = with(spss_mnm,{neo_1+neo_6+neo_11+neo_16+neo_21+neo_26+neo_31+neo_36+neo_41+neo_46+neo_51+neo_56})
+    attr(spss_mnm$TUP6_NEO_N,'Variable_Name_Long') = 'NEO-FFI Neuroticism'
+    attr(spss_mnm$TUP6_NEO_N,'value.labels')       = NULL
+    
+    # Extraversion (N Items: 12)
+    spss_mnm$TUP6_NEO_E                            = with(spss_mnm,{neo_2+neo_7+neo_12+neo_17+neo_22+neo_27+neo_32+neo_37+neo_42+neo_47+neo_52+neo_57})
+    attr(spss_mnm$TUP6_NEO_E,'Variable_Name_Long') = 'NEO-FFI Extraversion'
+    attr(spss_mnm$TUP6_NEO_E,'value.labels')       = NULL
+    
+    # Openess to Experiences (N Items: 12)
+    spss_mnm$TUP6_NEO_O                            = with(spss_mnm,{neo_3+neo_8+neo_13+neo_18+neo_23+neo_28+neo_33+neo_38+neo_43+neo_48+neo_53+neo_58})
+    attr(spss_mnm$TUP6_NEO_O,'Variable_Name_Long') = 'NEO-FFI Openness to New Experiences'
+    attr(spss_mnm$TUP6_NEO_O,'value.labels')       = NULL
+    
+    # Agreeableness (N Items: 12)
+    spss_mnm$TUP6_NEO_A                            = with(spss_mnm,{neo_4+neo_9+neo_14+neo_19+neo_24+neo_29+neo_34+neo_39+neo_44+neo_49+neo_54+neo_59})
+    attr(spss_mnm$TUP6_NEO_A,'Variable_Name_Long') = 'NEO-FFI Agreeableness'
+    attr(spss_mnm$TUP6_NEO_A,'value.labels')       = NULL
+    
+    # Gewissenhaftigkeit/ Conscientiousness (N Items: 12)
+    spss_mnm$TUP6_NEO_C                            = with(spss_mnm,{neo_5+neo_10+neo_15+neo_20+neo_25+neo_30+neo_35+neo_40+neo_45+neo_50+neo_55+neo_60})
+    attr(spss_mnm$TUP6_NEO_C,'Variable_Name_Long') = 'NEO-FFI Conscientiousness'
+    attr(spss_mnm$TUP6_NEO_C,'value.labels')       = NULL
+  } else {
+    # SCORE-BERECHNUNG
+    # Neurotizismus (N Items: 12)
+    spss_mnm$TUP6_NEO_N                            = spss_mnm$NEO_N
+    attr(spss_mnm$TUP6_NEO_N,'Variable_Name_Long') = 'NEO-FFI Neuroticism'
+    attr(spss_mnm$TUP6_NEO_N,'value.labels')       = NULL
+    
+    # Extraversion (N Items: 12)
+    spss_mnm$TUP6_NEO_E                            =  spss_mnm$NEO_E
+    attr(spss_mnm$TUP6_NEO_E,'Variable_Name_Long') = 'NEO-FFI Extraversion'
+    attr(spss_mnm$TUP6_NEO_E,'value.labels')       = NULL
+    
+    # Openess to Experiences (N Items: 12)
+    spss_mnm$TUP6_NEO_O                            =  spss_mnm$NEO_O
+    attr(spss_mnm$TUP6_NEO_O,'Variable_Name_Long') = 'NEO-FFI Openness to New Experiences'
+    attr(spss_mnm$TUP6_NEO_O,'value.labels')       = NULL
+    
+    # Agreeableness (N Items: 12)
+    spss_mnm$TUP6_NEO_A                            =  spss_mnm$NEO_V
+    attr(spss_mnm$TUP6_NEO_A,'Variable_Name_Long') = 'NEO-FFI Agreeableness'
+    attr(spss_mnm$TUP6_NEO_A,'value.labels')       = NULL
+    
+    # Gewissenhaftigkeit/ Conscientiousness (N Items: 12)
+    spss_mnm$TUP6_NEO_C                            =  spss_mnm$NEO_G
+    attr(spss_mnm$TUP6_NEO_C,'Variable_Name_Long') = 'NEO-FFI Conscientiousness'
+    attr(spss_mnm$TUP6_NEO_C,'value.labels')       = NULL
+  }
   
   
   ## AUDIT ======================================================================
-  # AUDIT Total Score (TS)
-  spss_mnm$TUP6_AUDIT_TS                            = with(spss_mnm, {aud_1+aud_2+aud_3+aud_4+aud_5+aud_6+aud_7+aud_8+aud_9+aud_10})
-  attr(spss_mnm$TUP6_AUDIT_TS,'Variable_Name_Long') = 'AUDIT Total Score'
-  attr(spss_mnm$TUP6_AUDIT_TS,'value.labels')       = NULL
-  
-  # AUDIT Risk Score (RS)
-  spss_mnm$TUP6_AUDIT_RS                            = NA
-  # make a list of recoding rules
-  recode_brackets      = list()
-  recode_brackets[[1]] = c(0:7)
-  recode_brackets[[2]] = c(8:15)
-  recode_brackets[[3]] = c(16:19)
-  recode_brackets[[4]] = c(20:100)
-  
-  recode_translations  = list()
-  for (rr in 1:length(recode_brackets)) {
-    recode_translations[[rr]] = rep(rr-1,length(recode_brackets[[rr]]))
+  if (spss_files[[ss]]$site != 'Bonn') {
+    # AUDIT Total Score (TS)
+    spss_mnm$TUP6_AUDIT_TS                            = with(spss_mnm, {aud_1+aud_2+aud_3+aud_4+aud_5+aud_6+aud_7+aud_8+aud_9+aud_10})
+    attr(spss_mnm$TUP6_AUDIT_TS,'Variable_Name_Long') = 'AUDIT Total Score'
+    attr(spss_mnm$TUP6_AUDIT_TS,'value.labels')       = NULL
+  } else {
+    # AUDIT Total Score (TS)
+    spss_mnm$TUP6_AUDIT_TS                                = spss_mnm$AUDIT_ges
+    attr(spss_mnm$TUP6_AUDIT_TS,'Variable_Name_Long')     = 'AUDIT Total Score'
+    attr(spss_mnm$TUP6_AUDIT_TS,'value.labels')           = NULL
+    spss_mnm$TUP6_AUDIT_TS[spss_mnm$TUP6_AUDIT_TS == 100] = NA
   }
-  rec_brack  = unlist(recode_brackets)
-  rec_transl = unlist(recode_translations)
-  # Recoding
-  spss_mnm$TUP6_AUDIT_RS                            = with(spss_mnm, {as.numeric(agk.recode.c(TUP6_AUDIT_TS,rec_brack,rec_transl))})
-  attr(spss_mnm$TUP6_AUDIT_RS,'Variable_Name_Long') = 'AUDIT Risk Score (RS)'
-  attr(spss_mnm$TUP6_AUDIT_RS,'value.labels')       = NULL
-  spss_mnm$TUP6_AUDIT_RS                            = factor(spss_mnm$TUP6_AUDIT_RS,levels=c(0,1,2,3),
-                                                             labels=c('Low risk','Risky or hazardous level','High risk or harmful level','High risk' ))
   
-  # AUDIT Consumption Score (CS)
-  # N Items: 3
-  spss_mnm$TUP6_AUDIT_CS                            = with(spss_mnm, {aud_1+aud_2+aud_3})
-  attr(spss_mnm$TUP6_AUDIT_CS,'Variable_Name_Long') = 'AUDIT Consumption Score (CS)'
-  attr(spss_mnm$TUP6_AUDIT_CS,'value.labels')       = NULL
   
-  # AUDIT Dependence Score (DS)
-  # N Items: 3
-  spss_mnm$TUP6_AUDIT_DS                            = with(spss_mnm, {aud_4+aud_5+aud_6})
-  attr(spss_mnm$TUP6_AUDIT_DS,'Variable_Name_Long') = 'AUDIT Dependence Score (DS)'
-  attr(spss_mnm$TUP6_AUDIT_DS,'value.labels')       = NULL
-  
-  # AUDIT Alcohol-related problems Score (AS)
-  # N Items: 4
-  spss_mnm$TUP6_AUDIT_AS                            = with(spss_mnm, {aud_7+aud_8+aud_9+aud_10})
-  attr(spss_mnm$TUP6_AUDIT_AS,'Variable_Name_Long') = 'AUDIT Alcohol-related problems Score (AS)'
-  attr(spss_mnm$TUP6_AUDIT_AS,'value.labels')       = NULL
+  if (spss_files[[ss]]$site != 'Bonn') {
+    # AUDIT Risk Score (RS)
+    spss_mnm$TUP6_AUDIT_RS                            = NA
+    # make a list of recoding rules
+    recode_brackets[[1]] = c(0:7)
+    recode_brackets[[2]] = c(8:15)
+    recode_brackets[[3]] = c(16:19)
+    recode_brackets[[4]] = c(20:100)
+    
+    recode_translations  = list()
+    for (rr in 1:length(recode_brackets)) {
+      recode_translations[[rr]] = rep(rr-1,length(recode_brackets[[rr]]))
+    }
+    rec_brack  = unlist(recode_brackets)
+    rec_transl = unlist(recode_translations)
+    # Recoding
+    spss_mnm$TUP6_AUDIT_RS                            = with(spss_mnm, {as.numeric(agk.recode.c(TUP6_AUDIT_TS,rec_brack,rec_transl))})
+    attr(spss_mnm$TUP6_AUDIT_RS,'Variable_Name_Long') = 'AUDIT Risk Score (RS)'
+    attr(spss_mnm$TUP6_AUDIT_RS,'value.labels')       = NULL
+    spss_mnm$TUP6_AUDIT_RS                            = factor(spss_mnm$TUP6_AUDIT_RS,levels=c(0,1,2,3),
+                                                               labels=c('Low risk','Risky or hazardous level','High risk or harmful level','High risk' ))
+    
+    # AUDIT Consumption Score (CS)
+    # N Items: 3
+    spss_mnm$TUP6_AUDIT_CS                            = with(spss_mnm, {aud_1+aud_2+aud_3})
+    attr(spss_mnm$TUP6_AUDIT_CS,'Variable_Name_Long') = 'AUDIT Consumption Score (CS)'
+    attr(spss_mnm$TUP6_AUDIT_CS,'value.labels')       = NULL
+    
+    # AUDIT Dependence Score (DS)
+    # N Items: 3
+    spss_mnm$TUP6_AUDIT_DS                            = with(spss_mnm, {aud_4+aud_5+aud_6})
+    attr(spss_mnm$TUP6_AUDIT_DS,'Variable_Name_Long') = 'AUDIT Dependence Score (DS)'
+    attr(spss_mnm$TUP6_AUDIT_DS,'value.labels')       = NULL
+    
+    # AUDIT Alcohol-related problems Score (AS)
+    # N Items: 4
+    spss_mnm$TUP6_AUDIT_AS                            = with(spss_mnm, {aud_7+aud_8+aud_9+aud_10})
+    attr(spss_mnm$TUP6_AUDIT_AS,'Variable_Name_Long') = 'AUDIT Alcohol-related problems Score (AS)'
+    attr(spss_mnm$TUP6_AUDIT_AS,'value.labels')       = NULL
+  } else {
+    spss_mnm$TUP6_AUDIT_RS                            = NA
+    attr(spss_mnm$TUP6_AUDIT_RS,'Variable_Name_Long') = 'AUDIT Risk Score (RS)'
+    attr(spss_mnm$TUP6_AUDIT_RS,'value.labels')       = NULL
+    spss_mnm$TUP6_AUDIT_RS                            = factor(spss_mnm$TUP6_AUDIT_RS,levels=c(0,1,2,3),
+                                                               labels=c('Low risk','Risky or hazardous level','High risk or harmful level','High risk' ))
+    
+    # AUDIT Consumption Score (CS)
+    # N Items: 3
+    spss_mnm$TUP6_AUDIT_CS                            = NA
+    attr(spss_mnm$TUP6_AUDIT_CS,'Variable_Name_Long') = 'AUDIT Consumption Score (CS)'
+    attr(spss_mnm$TUP6_AUDIT_CS,'value.labels')       = NULL
+    
+    # AUDIT Dependence Score (DS)
+    # N Items: 3
+    spss_mnm$TUP6_AUDIT_DS                            = NA
+    attr(spss_mnm$TUP6_AUDIT_DS,'Variable_Name_Long') = 'AUDIT Dependence Score (DS)'
+    attr(spss_mnm$TUP6_AUDIT_DS,'value.labels')       = NULL
+    
+    # AUDIT Alcohol-related problems Score (AS)
+    # N Items: 4
+    spss_mnm$TUP6_AUDIT_AS                            = NA
+    attr(spss_mnm$TUP6_AUDIT_AS,'Variable_Name_Long') = 'AUDIT Alcohol-related problems Score (AS)'
+    attr(spss_mnm$TUP6_AUDIT_AS,'value.labels')       = NULL
+  }
   
   
   ## Sense of Coherence (SOC-13) =================================================
-  # SOC-13 Total Score (TS)
-  # N Items: 13
-  spss_mnm$TUP6_SOC_TS                            = with(spss_mnm, {soc_1+soc_2+soc_3+soc_4+soc_5+soc_6+soc_7+soc_8+soc_9+soc_10+soc_11+soc_12+soc_13})
-  attr(spss_mnm$TUP6_SOC_TS,'Variable_Name_Long') = 'Sense Of Coherence (SOC-13) Total Score'
-  attr(spss_mnm$TUP6_SOC_TS,'value.labels')       = NULL
-  
+  if (spss_files[[ss]]$site != 'Bonn') {
+    # SOC-13 Total Score (TS)
+    # N Items: 13
+    spss_mnm$TUP6_SOC_TS                            = with(spss_mnm, {soc_1+soc_2+soc_3+soc_4+soc_5+soc_6+soc_7+soc_8+soc_9+soc_10+soc_11+soc_12+soc_13})
+    attr(spss_mnm$TUP6_SOC_TS,'Variable_Name_Long') = 'Sense Of Coherence (SOC-13) Total Score'
+    attr(spss_mnm$TUP6_SOC_TS,'value.labels')       = NULL
+  } else {
+    # SOC-13 Total Score (TS)
+    # N Items: 13
+    spss_mnm$TUP6_SOC_TS                            = NA
+    attr(spss_mnm$TUP6_SOC_TS,'Variable_Name_Long') = 'Sense Of Coherence (SOC-13) Total Score'
+    attr(spss_mnm$TUP6_SOC_TS,'value.labels')       = NULL
+  }
   
   
   ## PANAS =======================================================================
-  # recoding names
-  names(spss_mnm) = gsub('PANAS_','pan_',names(spss_mnm))
-  # Positive Affect (PA)
-  # N Items: 10
-  spss_mnm$TUP6_PANAS_PA                            = with(spss_mnm, {pan_1+pan_3+pan_4+pan_6+pan_10+pan_11+pan_13+pan_15+pan_17+pan_18})
-  attr(spss_mnm$TUP6_PANAS_PA,'Variable_Name_Long') = 'PANAS Positive Affect (PA)'
-  attr(spss_mnm$TUP6_PANAS_PA,'value.labels')       = NULL
-  
-  # Negative Affect (NA)
-  # N Items: 10
-  spss_mnm$TUP6_PANAS_NA                            = with(spss_mnm, {pan_2+pan_5+pan_7+pan_8+pan_9+pan_12+pan_14+pan_16+pan_19+pan_20})
-  attr(spss_mnm$TUP6_PANAS_NA,'Variable_Name_Long') = 'PANAS Negative Affect (NA)'
-  attr(spss_mnm$TUP6_PANAS_NA,'value.labels')       = NULL
+  if (spss_files[[ss]]$site != 'Bonn') {
+    # recoding names
+    names(spss_mnm) = gsub('PANAS_','pan_',names(spss_mnm))
+    # Positive Affect (PA)
+    # N Items: 10
+    spss_mnm$TUP6_PANAS_PA                            = with(spss_mnm, {pan_1+pan_3+pan_4+pan_6+pan_10+pan_11+pan_13+pan_15+pan_17+pan_18})
+    attr(spss_mnm$TUP6_PANAS_PA,'Variable_Name_Long') = 'PANAS Positive Affect (PA)'
+    attr(spss_mnm$TUP6_PANAS_PA,'value.labels')       = NULL
+    
+    # Negative Affect (NA)
+    # N Items: 10
+    spss_mnm$TUP6_PANAS_NA                            = with(spss_mnm, {pan_2+pan_5+pan_7+pan_8+pan_9+pan_12+pan_14+pan_16+pan_19+pan_20})
+    attr(spss_mnm$TUP6_PANAS_NA,'Variable_Name_Long') = 'PANAS Negative Affect (NA)'
+    attr(spss_mnm$TUP6_PANAS_NA,'value.labels')       = NULL
+  } else {
+    # recoding names
+    names(spss_mnm) = gsub('PANAS_','pan_',names(spss_mnm))
+    # Positive Affect (PA)
+    # N Items: 10
+    spss_mnm$TUP6_PANAS_PA                            = spss_mnm$pan_PA
+    attr(spss_mnm$TUP6_PANAS_PA,'Variable_Name_Long') = 'PANAS Positive Affect (PA)'
+    attr(spss_mnm$TUP6_PANAS_PA,'value.labels')       = NULL
+    
+    # Negative Affect (NA)
+    # N Items: 10
+    spss_mnm$TUP6_PANAS_NA                            = spss_mnm$pan_NA
+    attr(spss_mnm$TUP6_PANAS_NA,'Variable_Name_Long') = 'PANAS Negative Affect (NA)'
+    attr(spss_mnm$TUP6_PANAS_NA,'value.labels')       = NULL
+  }
   
   
   ## ADS =========================================================================
-  # ADS Total Score (TS)
-  spss_mnm$TUP6_ADS_TS                            = with(spss_mnm, {ads_1+ads_2+ ads_3+ads_4+ads_5+ads_6+ads_7+ads_8+ads_9+ads_10+ads_11+ads_12+ads_13+ads_14+ads_15+ads_16+ads_17+ads_18+ads_19+ads_20+ads_21+ads_22+ads_23+ads_24+ads_25})
-  attr(spss_mnm$TUP6_ADS_TS,'Variable_Name_Long') = 'ADS Total Score (TS)'
-  attr(spss_mnm$TUP6_ADS_TS,'value.labels')       = NULL
+  if (spss_files[[ss]]$site != 'Bonn') {
+    # ADS Total Score (TS)
+    spss_mnm$TUP6_ADS_TS                            = with(spss_mnm, {ads_1+ads_2+ ads_3+ads_4+ads_5+ads_6+ads_7+ads_8+ads_9+ads_10+ads_11+ads_12+ads_13+ads_14+ads_15+ads_16+ads_17+ads_18+ads_19+ads_20+ads_21+ads_22+ads_23+ads_24+ads_25})
+    attr(spss_mnm$TUP6_ADS_TS,'Variable_Name_Long') = 'ADS Total Score (TS)'
+    attr(spss_mnm$TUP6_ADS_TS,'value.labels')       = NULL
+  } else {
+    # ADS Total Score (TS)
+    spss_mnm$TUP6_ADS_TS                            = spss_mnm$ADS_ges
+    attr(spss_mnm$TUP6_ADS_TS,'Variable_Name_Long') = 'ADS Total Score (TS)'
+    attr(spss_mnm$TUP6_ADS_TS,'value.labels')       = NULL
+  }
   
   ## OCDS ========================================================================
-  # Computation according to Mann/Ackermann
-  spss_mnm$ocdm_12                                = with(spss_mnm, {apply(cbind(ocd_1, ocd_2),FUN = max,MARGIN = 1)})
-  spss_mnm$ocdm_78                                = with(spss_mnm, {apply(cbind(ocd_7, ocd_8),FUN = max,MARGIN = 1)})
-  spss_mnm$ocdm_910                               = with(spss_mnm, {apply(cbind(ocd_9, ocd_10),FUN = max,MARGIN = 1)})
-  spss_mnm$ocdm_1314                              = with(spss_mnm, {apply(cbind(ocd_13, ocd_14),FUN = max,MARGIN = 1)})
-  
-  spss_mnm$TUP6_OCDS_TS_Mann                            = with(spss_mnm, {ocdm_12+ocd_3+ocd_4+ocd_5+ocd_6+ocdm_78+ocdm_910+ocd_11+ocd_12+ocdm_1314})
-  attr(spss_mnm$TUP6_OCDS_TS_Mann,'Variable_Name_Long') = 'OCDS Total Score according to Mann/Ackermann'
-  attr(spss_mnm$TUP6_OCDS_TS_Mann,'value.labels')       = NULL
-  
-  spss_mnm$TUP6_OCDS_Cog_Mann                            = with(spss_mnm, {ocdm_12+ocd_3+ocd_4+ocd_5+ocd_6})
-  attr(spss_mnm$TUP6_OCDS_Cog_Mann,'Variable_Name_Long') = 'OCDS Cognitions according to Mann/Ackermann'
-  attr(spss_mnm$TUP6_OCDS_Cog_Mann,'value.labels')       = NULL
-  
-  spss_mnm$TUP6_OCDS_Act_Mann                            = with(spss_mnm, {ocdm_78+ocdm_910+ocd_11+ocd_12+ocdm_1314})
-  attr(spss_mnm$TUP6_OCDS_Act_Mann,'Variable_Name_Long') = 'OCDS Actions according to Mann/Ackermann'
-  attr(spss_mnm$TUP6_OCDS_Act_Mann,'value.labels')       = NULL
-  
-  
-  # Nach Nakovics et al#######################/
-  # Berechnung der Scores ohne Item 7 und 8
-  # Anmerkung Helmut: [We do not know who this is]
-  # Gesamtscore kann zum Zwecke der Vergleichbarkeit beibehalten werden.
-  # Die 2-Faktorlösung hat jedoch u.a. eine höhere Stabilität und Varianzaufklärung und sollte daher präferiert werden
-  # maybe it is this paper: https://www.sciencedirect.com/science/article/pii/S0306460308001597 
-  spss_mnm$TUP6_OCDS_TS_Nak                            = with(spss_mnm, {ocd_1+ocd_2+ocd_3+ocd_4+ocd_5+ocd_6+ocd_9+ocd_10+ocd_11+ocd_12+ocd_13+ocd_14})
-  attr(spss_mnm$TUP6_OCDS_TS_Nak,'Variable_Name_Long') = 'OCDS Total Score without Items 7/8 according to Nakovics et al'
-  attr(spss_mnm$TUP6_OCDS_TS_Nak,'value.labels')       = NULL
-  
-  spss_mnm$TUP6_OCDS_Cog_Nak                            = with(spss_mnm, {ocd_1+ocd_2+ocd_3+ocd_4+ocd_5+ocd_6})
-  attr(spss_mnm$TUP6_OCDS_Cog_Nak,'Variable_Name_Long') = 'OCDS Cognition Score without Items 7/8 according to Nakovics et al'
-  attr(spss_mnm$TUP6_OCDS_Cog_Nak,'value.labels')       = NULL
-  
-  spss_mnm$TUP6_OCDS_Act_Nak                            = with(spss_mnm, {ocd_9+ocd_10+ocd_11+ocd_12+ocd_13+ocd_14})
-  attr(spss_mnm$TUP6_OCDS_Act_Nak,'Variable_Name_Long') = 'OCDS Action Score without Items 7/8 according to Nakovics et al'
-  attr(spss_mnm$TUP6_OCDS_Act_Nak,'value.labels')       = NULL
-  
-  # Löschen der Hilfsvariablen 
-  spss_mnm[c('ocdm_12','ocdm_78','ocdm_910','ocdm_1314')] = NULL
+  if (spss_files[[ss]]$site != 'Bonn') {
+    # Computation according to Mann/Ackermann
+    spss_mnm$ocdm_12                                = with(spss_mnm, {apply(cbind(ocd_1, ocd_2),FUN = max,MARGIN = 1)})
+    spss_mnm$ocdm_78                                = with(spss_mnm, {apply(cbind(ocd_7, ocd_8),FUN = max,MARGIN = 1)})
+    spss_mnm$ocdm_910                               = with(spss_mnm, {apply(cbind(ocd_9, ocd_10),FUN = max,MARGIN = 1)})
+    spss_mnm$ocdm_1314                              = with(spss_mnm, {apply(cbind(ocd_13, ocd_14),FUN = max,MARGIN = 1)})
+    
+    spss_mnm$TUP6_OCDS_TS_Mann                            = with(spss_mnm, {ocdm_12+ocd_3+ocd_4+ocd_5+ocd_6+ocdm_78+ocdm_910+ocd_11+ocd_12+ocdm_1314})
+    attr(spss_mnm$TUP6_OCDS_TS_Mann,'Variable_Name_Long') = 'OCDS Total Score according to Mann/Ackermann'
+    attr(spss_mnm$TUP6_OCDS_TS_Mann,'value.labels')       = NULL
+    
+    spss_mnm$TUP6_OCDS_Cog_Mann                            = with(spss_mnm, {ocdm_12+ocd_3+ocd_4+ocd_5+ocd_6})
+    attr(spss_mnm$TUP6_OCDS_Cog_Mann,'Variable_Name_Long') = 'OCDS Cognitions according to Mann/Ackermann'
+    attr(spss_mnm$TUP6_OCDS_Cog_Mann,'value.labels')       = NULL
+    
+    spss_mnm$TUP6_OCDS_Act_Mann                            = with(spss_mnm, {ocdm_78+ocdm_910+ocd_11+ocd_12+ocdm_1314})
+    attr(spss_mnm$TUP6_OCDS_Act_Mann,'Variable_Name_Long') = 'OCDS Actions according to Mann/Ackermann'
+    attr(spss_mnm$TUP6_OCDS_Act_Mann,'value.labels')       = NULL
+    
+    
+    # Nach Nakovics et al#######################/
+    # Berechnung der Scores ohne Item 7 und 8
+    # Anmerkung Helmut: [We do not know who this is]
+    # Gesamtscore kann zum Zwecke der Vergleichbarkeit beibehalten werden.
+    # Die 2-Faktorlösung hat jedoch u.a. eine höhere Stabilität und Varianzaufklärung und sollte daher präferiert werden
+    # maybe it is this paper: https://www.sciencedirect.com/science/article/pii/S0306460308001597 
+    spss_mnm$TUP6_OCDS_TS_Nak                            = with(spss_mnm, {ocd_1+ocd_2+ocd_3+ocd_4+ocd_5+ocd_6+ocd_9+ocd_10+ocd_11+ocd_12+ocd_13+ocd_14})
+    attr(spss_mnm$TUP6_OCDS_TS_Nak,'Variable_Name_Long') = 'OCDS Total Score without Items 7/8 according to Nakovics et al'
+    attr(spss_mnm$TUP6_OCDS_TS_Nak,'value.labels')       = NULL
+    
+    spss_mnm$TUP6_OCDS_Cog_Nak                            = with(spss_mnm, {ocd_1+ocd_2+ocd_3+ocd_4+ocd_5+ocd_6})
+    attr(spss_mnm$TUP6_OCDS_Cog_Nak,'Variable_Name_Long') = 'OCDS Cognition Score without Items 7/8 according to Nakovics et al'
+    attr(spss_mnm$TUP6_OCDS_Cog_Nak,'value.labels')       = NULL
+    
+    spss_mnm$TUP6_OCDS_Act_Nak                            = with(spss_mnm, {ocd_9+ocd_10+ocd_11+ocd_12+ocd_13+ocd_14})
+    attr(spss_mnm$TUP6_OCDS_Act_Nak,'Variable_Name_Long') = 'OCDS Action Score without Items 7/8 according to Nakovics et al'
+    attr(spss_mnm$TUP6_OCDS_Act_Nak,'value.labels')       = NULL
+    
+    # Löschen der Hilfsvariablen 
+    spss_mnm[c('ocdm_12','ocdm_78','ocdm_910','ocdm_1314')] = NULL
+  } else {
+    warning("Bonn just gives OCDS_ges; do not know how calculated and it is all NA")
+    spss_mnm$TUP6_OCDS_TS_Mann                            = spss_mnm$OCDS_ges
+    attr(spss_mnm$TUP6_OCDS_TS_Mann,'Variable_Name_Long') = 'OCDS Total Score according to Mann/Ackermann'
+    attr(spss_mnm$TUP6_OCDS_TS_Mann,'value.labels')       = NULL
+    
+    spss_mnm$TUP6_OCDS_Cog_Mann                            = NA
+    attr(spss_mnm$TUP6_OCDS_Cog_Mann,'Variable_Name_Long') = 'OCDS Cognitions according to Mann/Ackermann'
+    attr(spss_mnm$TUP6_OCDS_Cog_Mann,'value.labels')       = NULL
+    
+    spss_mnm$TUP6_OCDS_Act_Mann                            = NA
+    attr(spss_mnm$TUP6_OCDS_Act_Mann,'Variable_Name_Long') = 'OCDS Actions according to Mann/Ackermann'
+    attr(spss_mnm$TUP6_OCDS_Act_Mann,'value.labels')       = NULL
+    
+    spss_mnm$TUP6_OCDS_TS_Nak                            = NA
+    attr(spss_mnm$TUP6_OCDS_TS_Nak,'Variable_Name_Long') = 'OCDS Total Score without Items 7/8 according to Nakovics et al'
+    attr(spss_mnm$TUP6_OCDS_TS_Nak,'value.labels')       = NULL
+    
+    spss_mnm$TUP6_OCDS_Cog_Nak                            = NA
+    attr(spss_mnm$TUP6_OCDS_Cog_Nak,'Variable_Name_Long') = 'OCDS Cognition Score without Items 7/8 according to Nakovics et al'
+    attr(spss_mnm$TUP6_OCDS_Cog_Nak,'value.labels')       = NULL
+    
+    spss_mnm$TUP6_OCDS_Act_Nak                            = NA
+    attr(spss_mnm$TUP6_OCDS_Act_Nak,'Variable_Name_Long') = 'OCDS Action Score without Items 7/8 according to Nakovics et al'
+    attr(spss_mnm$TUP6_OCDS_Act_Nak,'value.labels')       = NULL
+  }
   
   
   ## URICA =======================================================================
-  # recoding for Mannheim
-  names(spss_mnm) = gsub('uri$','uri_1',names(spss_mnm))
-  
-  # checking if items are already coded into right direction; it seems yes
-  # with(spss_mnm, {corr.test(cbind(uri_1,uri_5,uri_11,uri_13,uri_23,uri_26,uri_29))})
-  
-  # Precontemplation (PC)
-  # N Items: 7 (Item 31 is omitted)
-  spss_mnm$TUP6_URICA_PC                            = with(spss_mnm, {apply(cbind(uri_1,uri_5,uri_11,uri_13,uri_23,uri_26,uri_29),MARGIN = 1,FUN = mean)})
-  attr(spss_mnm$TUP6_URICA_PC,'Variable_Name_Long') = 'URICA Precontemplation (PC)'
-  attr(spss_mnm$TUP6_URICA_PC,'value.labels')       = NULL
-  
-  
-  # Contemplation (C)
-  # N Items: 7 (Item 4 is omitted)
-  spss_mnm$TUP6_URICA_C                            = with(spss_mnm, {apply(cbind(uri_2,uri_8,uri_12,uri_15,uri_19,uri_21,uri_24),MARGIN = 1,FUN = mean)})
-  attr(spss_mnm$TUP6_URICA_C,'Variable_Name_Long') = 'URICA Contemplation (C)'
-  attr(spss_mnm$TUP6_URICA_C,'value.labels')       = NULL
-  
-  
-  # Action (A)
-  # N Items: 7 (Item 20 is omitted)
-  spss_mnm$TUP6_URICA_A                            = with(spss_mnm, {apply(cbind(uri_3,uri_7,uri_10,uri_14,uri_17,uri_25,uri_30),MARGIN = 1, FUN = mean)})
-  attr(spss_mnm$TUP6_URICA_A,'Variable_Name_Long') = 'URICA Action (A)'
-  attr(spss_mnm$TUP6_URICA_A,'value.labels')       = NULL
-  
-  
-  # Maintenance (M)
-  # N Items: 7 (Item 9 is omitted)
-  spss_mnm$TUP6_URICA_M                            = with(spss_mnm, {apply(cbind(uri_6+uri_16+uri_18+uri_22+uri_27+uri_28+uri_32),MARGIN = 1, FUN = mean)})
-  attr(spss_mnm$TUP6_URICA_M,'Variable_Name_Long') = 'URICA Maintenance (M)'
-  attr(spss_mnm$TUP6_URICA_M,'value.labels')       = NULL
-  
-  
-  # Readiness to Change (RC)
-  # RC = c + A + M - PC
-  spss_mnm$TUP6_URICA_RC                            = with(spss_mnm, {TUP6_URICA_C + TUP6_URICA_A + TUP6_URICA_M - TUP6_URICA_PC})
-  attr(spss_mnm$TUP6_URICA_RC,'Variable_Name_Long') = 'URICA Readiness to Change (RC)'
-  attr(spss_mnm$TUP6_URICA_RC,'value.labels')       = NULL
+  if (spss_files[[ss]]$site != 'Bonn') {
+    # recoding for Mannheim
+    names(spss_mnm) = gsub('uri$','uri_1',names(spss_mnm))
+    
+    # checking if items are already coded into right direction; it seems yes
+    # with(spss_mnm, {corr.test(cbind(uri_1,uri_5,uri_11,uri_13,uri_23,uri_26,uri_29))})
+    
+    # Precontemplation (PC)
+    # N Items: 7 (Item 31 is omitted)
+    spss_mnm$TUP6_URICA_PC                            = with(spss_mnm, {apply(cbind(uri_1,uri_5,uri_11,uri_13,uri_23,uri_26,uri_29),MARGIN = 1,FUN = mean)})
+    attr(spss_mnm$TUP6_URICA_PC,'Variable_Name_Long') = 'URICA Precontemplation (PC)'
+    attr(spss_mnm$TUP6_URICA_PC,'value.labels')       = NULL
+    
+    
+    # Contemplation (C)
+    # N Items: 7 (Item 4 is omitted)
+    spss_mnm$TUP6_URICA_C                            = with(spss_mnm, {apply(cbind(uri_2,uri_8,uri_12,uri_15,uri_19,uri_21,uri_24),MARGIN = 1,FUN = mean)})
+    attr(spss_mnm$TUP6_URICA_C,'Variable_Name_Long') = 'URICA Contemplation (C)'
+    attr(spss_mnm$TUP6_URICA_C,'value.labels')       = NULL
+    
+    
+    # Action (A)
+    # N Items: 7 (Item 20 is omitted)
+    spss_mnm$TUP6_URICA_A                            = with(spss_mnm, {apply(cbind(uri_3,uri_7,uri_10,uri_14,uri_17,uri_25,uri_30),MARGIN = 1, FUN = mean)})
+    attr(spss_mnm$TUP6_URICA_A,'Variable_Name_Long') = 'URICA Action (A)'
+    attr(spss_mnm$TUP6_URICA_A,'value.labels')       = NULL
+    
+    
+    # Maintenance (M)
+    # N Items: 7 (Item 9 is omitted)
+    spss_mnm$TUP6_URICA_M                            = with(spss_mnm, {apply(cbind(uri_6+uri_16+uri_18+uri_22+uri_27+uri_28+uri_32),MARGIN = 1, FUN = mean)})
+    attr(spss_mnm$TUP6_URICA_M,'Variable_Name_Long') = 'URICA Maintenance (M)'
+    attr(spss_mnm$TUP6_URICA_M,'value.labels')       = NULL
+    
+    
+    # Readiness to Change (RC)
+    # RC = c + A + M - PC
+    spss_mnm$TUP6_URICA_RC                            = with(spss_mnm, {TUP6_URICA_C + TUP6_URICA_A + TUP6_URICA_M - TUP6_URICA_PC})
+    attr(spss_mnm$TUP6_URICA_RC,'Variable_Name_Long') = 'URICA Readiness to Change (RC)'
+    attr(spss_mnm$TUP6_URICA_RC,'value.labels')       = NULL
+  } else {
+    warning("Bonn has only URICA_ges")
+    # Readiness to Change (RC)
+    # RC = c + A + M - PC
+    spss_mnm$TUP6_URICA_RC                            = spss_mnm$URICA_ges
+    attr(spss_mnm$TUP6_URICA_RC,'Variable_Name_Long') = 'URICA Readiness to Change (RC)'
+    attr(spss_mnm$TUP6_URICA_RC,'value.labels')       = NULL
+  }
   
   ## Alcohol Usage Questionnaire (AUQ) ===========================================
-  if (spss_files[[ss]]$site == 'Mannheim' | spss_files[[ss]]$site == 'Bonn') {
+  if (spss_files[[ss]]$site == 'Mannheim') {
     # AUQ before MRI session (AUQ_T1)
     # N Items: 8
     spss_mnm$TUP6_AUQ_T1                            = with(spss_mnm, {auq_1v+auq_2v+auq_3v+auq_4v+auq_5v+auq_6v+auq_7v+auq_8v})
@@ -539,7 +671,7 @@ for (ss in 1:length(spss_files)) {
     spss_mnm$TUP6_AUQ_TS                            = with(spss_mnm, {TUP6_AUQ_T1+TUP6_AUQ_T2})
     attr(spss_mnm$TUP6_AUQ_TS,'Variable_Name_Long') = 'AUQ TOtal Score (TS)'
     attr(spss_mnm$TUP6_AUQ_TS,'value.labels')       = NULL
-  } else {
+  } else if (spss_files[[ss]]$site == 'Berlin') {
     message('Berlin AUQ is still missing!!! Will probably need to take the sum score AUQ.')
     
     # AUQ before MRI session (AUQ_T1)
@@ -561,6 +693,12 @@ for (ss in 1:length(spss_files)) {
     spss_mnm$TUP6_AUQ_TS                            = NA
     attr(spss_mnm$TUP6_AUQ_TS,'Variable_Name_Long') = 'AUQ TOtal Score (TS)'
     attr(spss_mnm$TUP6_AUQ_TS,'value.labels')       = NULL
+  } else {
+    # AUQ Total Score (AUQ_TS)
+    # N Items: 16
+    spss_mnm$TUP6_AUQ_TS                            = spss_mnm$AUQ_Gesamt
+    attr(spss_mnm$TUP6_AUQ_TS,'Variable_Name_Long') = 'AUQ TOtal Score (TS)'
+    attr(spss_mnm$TUP6_AUQ_TS,'value.labels')       = NULL
   }
   
   # packing the data
@@ -570,7 +708,8 @@ for (ss in 1:length(spss_files)) {
   } else if (spss_files[[ss]]$site == 'Berlin') {
     spss_files[[ss]]$data$TUP6_ID = spss_files[[ss]]$data$ID
   } else if (spss_files[[ss]]$site == 'Bonn') {
-    ## implement later
+    warning('ADD_P_ has not implemented the 0s')
+    spss_files[[ss]]$data$TUP6_ID = paste0('ADD_P_',trimws(spss_files[[ss]]$data$ADD_P))
   } else {
     stop('Unknown site.')
   }
@@ -582,10 +721,12 @@ TUP6_psychosocial_data = TUP6_psychosocial_data[grep('TUP6',names(TUP6_psychosoc
 for (ss in 2:length(spss_files)) {
   cur_dat                = spss_files[[ss]]$data
   cur_dat                = cur_dat[grep('TUP6',names(cur_dat))]
-  TUP6_psychosocial_data = rbind(TUP6_psychosocial_data,cur_dat)
+  TUP6_psychosocial_data = rbind.fill(TUP6_psychosocial_data,cur_dat)
 }
 
 View(TUP6_psychosocial_data)
+
+write.xlsx(TUP6_psychosocial_data,file = 'TUP6_psychosocial_data.xlsx')
 
 
 
