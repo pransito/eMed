@@ -1,5 +1,5 @@
 # eMed
-eMed analyses for MRI, inventory, psychosocial data etc.
+eMed analyses for inventory data, psychosocial data etc.
 
 inventory
 ---------
@@ -15,10 +15,3 @@ allocation or even multiple ID variables
 
 this part of the repository (inventory and psychosocial) is to keep track of how we read in all the inventory and psychosocial and
 evene genetic data of the 499 subjects
-
-MRI
----
-
-the second part of the emed repository is the collection of preprocessing pipelines and ss models to be applied to the NGFN data
-further these scripts and pipelines shall be employed and elaborated and modified to be used in the eMed study (aka the successor)
-of the ngfn study.
